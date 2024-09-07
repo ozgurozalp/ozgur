@@ -1,0 +1,25 @@
+{
+    "name": "ozgur",
+    "version": "0.0.1",
+    "description": "Özgür ÖZALP About",
+    "bin": {
+        "ozgur": "ozgur.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ozgurozalp/ozgur.git"
+    },
+    "keywords": [
+        "ozgur",
+        "ozgurozalp",
+        "özgür",
+        "özgürözalp"
+    ],
+    "author": "Özgür ÖZALP <mail@ozgurozalp.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/ozgurozalp/ozgur/issues"
+    },
+    "homepage": "https://github.com/ozgurozalp/ozgur#readme",
+    "dependencies": {}
+}
