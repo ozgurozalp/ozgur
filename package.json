@@ -1,6 +1,6 @@
 {
     "name": "ozgur",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Özgür ÖZALP About",
     "bin": {
         "ozgur": "ozgur.js"
