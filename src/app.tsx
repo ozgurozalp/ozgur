@@ -55,7 +55,7 @@ function Menu({ selected }: { selected: number }) {
     );
 }
 
-export function App() {
+export function App({ showAvatar = true }: { showAvatar?: boolean }) {
     const { exit } = useApp();
     const { isRawModeSupported } = useStdin();
     const { columns } = useWindowSize();
@@ -63,7 +63,7 @@ export function App() {
     const [farewell, setFarewell] = useState<string | null>(null);
 
     const narrow = columns < 90;
-    const cardWidth = Math.min(columns, 100);
+    const cardWidth = Math.min(columns, 110);
 
     const choose = async (index: number) => {
         const item = links[index];
@@ -91,7 +91,9 @@ export function App() {
     return (
         <Box flexDirection="column" width={cardWidth} paddingX={1}>
             <Box borderStyle="round" borderColor="magenta" paddingX={2} paddingY={1} flexDirection={narrow ? 'column' : 'row'} gap={narrow ? 1 : 3}>
-                <Avatar width={narrow ? 20 : 28} onSettled={isRawModeSupported ? undefined : () => setTimeout(exit, 50)} />
+                {showAvatar ? (
+                    <Avatar width={narrow ? 24 : 36} onSettled={isRawModeSupported ? undefined : () => setTimeout(exit, 50)} />
+                ) : null}
                 <Box flexDirection="column" flexShrink={1} gap={1}>
                     <Box flexDirection="column">
                         <Gradient name="pastel">
