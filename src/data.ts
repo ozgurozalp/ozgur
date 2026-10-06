@@ -40,3 +40,65 @@ export const links: LinkItem[] = [
         color: 'blue',
     },
 ];
+
+export type Project = {
+    key: string;
+    icon: string;
+    name: string;
+    description: string;
+    url: string;
+    /** Turkish version of the same project, opened for Turkish locales. */
+    urlTr?: string;
+    color: string;
+};
+
+export const projects: Project[] = [
+    {
+        key: 'bahane',
+        icon: '🙊',
+        name: 'bahane.si',
+        description: 'Excuse generator: pick a ready-made excuse or let AI write one for you',
+        url: 'https://bahane.si',
+        color: 'yellow',
+    },
+    {
+        key: 'bahaneni',
+        icon: '🙅',
+        name: 'bahaneni.si',
+        description: 'The anti-excuse site: send one link and let the picture do the talking',
+        url: 'https://bahaneni.si',
+        color: 'redBright',
+    },
+    {
+        key: 'derdini',
+        icon: '😮‍💨',
+        name: 'derdini.si',
+        description: 'One answer to tiny troubles: a shareable link for petty complaints',
+        url: 'https://derdini.si',
+        color: 'magentaBright',
+    },
+    {
+        key: 'tavsiye',
+        icon: '🧓',
+        name: 'tavsiye.si',
+        description: "Advice nobody asked for, from your big brother, auntie, mom and more",
+        url: 'https://tavsiye.si',
+        color: 'cyanBright',
+    },
+    {
+        key: 'rps',
+        icon: '✊',
+        name: 'Rock Paper Scissors Online',
+        description: 'Play with friends via invite link or room code (TR: taskagitmakas.online)',
+        url: 'https://rock.paperscissors.online',
+        urlTr: 'https://taskagitmakas.online',
+        color: 'greenBright',
+    },
+];
+
+const isTurkish = () => {
+    const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || Intl.DateTimeFormat().resolvedOptions().locale;
+    return /^tr\b|^tr[-_]/i.test(locale);
+};
+
+export const projectUrl = (project: Project) => (project.urlTr && isTurkish() ? project.urlTr : project.url);
