@@ -21,7 +21,7 @@ export const links: LinkItem[] = [
         label: 'GitHub',
         title: 'What am I doing about Open Source?',
         url: 'https://github.com/ozgurozalp',
-        color: 'gray',
+        color: 'whiteBright',
     },
     {
         key: 'x',

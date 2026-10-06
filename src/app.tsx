@@ -41,13 +41,13 @@ function Menu({ selected }: { selected: number }) {
                 {links.map((item, i) => {
                     const active = i === selected;
                     return (
-                        <Text key={item.key} color={active ? item.color : undefined} dimColor={!active}>
+                        <Text key={item.key} bold={active} color={active ? item.color : undefined} dimColor={!active}>
                             {active ? '❯ ' : '  '}
-                            {item.icon}  {item.title} (<Text bold>{item.label}</Text>)
+                            {item.icon}  {item.title} ({item.label})
                         </Text>
                     );
                 })}
-                <Text color={selected === BYE ? 'red' : undefined} dimColor={selected !== BYE}>
+                <Text bold={selected === BYE} color={selected === BYE ? 'red' : undefined} dimColor={selected !== BYE}>
                     {selected === BYE ? '❯ ' : '  '}👋  Nope. Bye.
                 </Text>
             </Box>
