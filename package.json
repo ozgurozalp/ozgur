@@ -1,9 +1,23 @@
 {
     "name": "ozgur",
-    "version": "1.0.3",
+    "version": "2.0.0",
     "description": "Özgür ÖZALP About",
+    "type": "module",
     "bin": {
-        "ozgur": "ozgur.js"
+        "ozgur": "dist/cli.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "engines": {
+        "node": ">=22"
+    },
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "start": "node dist/cli.js",
+        "typecheck": "tsc --noEmit",
+        "prepublishOnly": "npm run typecheck && npm run build"
     },
     "repository": {
         "type": "git",
@@ -13,7 +27,10 @@
         "ozgur",
         "ozgurozalp",
         "özgür",
-        "özgürözalp"
+        "özgürözalp",
+        "cli",
+        "tui",
+        "ink"
     ],
     "author": "Özgür ÖZALP <mail@ozgurozalp.com>",
     "license": "MIT",
@@ -22,12 +39,18 @@
     },
     "homepage": "https://github.com/ozgurozalp/ozgur#readme",
     "dependencies": {
-        "chalk": "^4.1.0",
-        "got": "^11.5.0",
-        "inquirer": "^7.3.0",
-        "open": "6.0.0",
-        "terminal-image": "^1.1.0",
-        "terminal-link": "^2.1.1",
-        "word-wrap": "^1.2.3"
+        "ink": "^8.0.0",
+        "ink-gradient": "^4.0.1",
+        "ink-link": "^5.0.0",
+        "ink-spinner": "^5.0.0",
+        "jimp": "^1.6.1",
+        "open": "^11.0.4",
+        "react": "^19.3.0"
+    },
+    "devDependencies": {
+        "@types/node": "^26.6.4",
+        "@types/react": "^19.3.0",
+        "tsup": "^8.5.1",
+        "typescript": "^7.0.2"
     }
 }
