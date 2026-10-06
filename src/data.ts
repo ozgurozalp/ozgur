@@ -43,6 +43,7 @@ export const links: LinkItem[] = [
 
 export type Project = {
     key: string;
+    /** A single-codepoint emoji: ZWJ sequences like 😮‍💨 take a different width in some terminals and break the alignment. */
     icon: string;
     name: string;
     description: string;
@@ -71,7 +72,7 @@ export const projects: Project[] = [
     },
     {
         key: 'derdini',
-        icon: '😮‍💨',
+        icon: '😩',
         name: 'derdini.si',
         description: 'One answer to tiny troubles: a shareable link for petty complaints',
         url: 'https://derdini.si',

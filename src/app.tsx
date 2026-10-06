@@ -93,7 +93,7 @@ function Projects({ selected }: { selected: number }) {
                 })}
                 <Box marginTop={1}>
                     <Option active={selected === BACK} color="yellow">
-                        ←  Back
+                        {'←   Back'}
                     </Option>
                 </Box>
             </Box>
