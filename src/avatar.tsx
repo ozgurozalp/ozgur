@@ -1,68 +1,73 @@
 import { useEffect, useState } from 'react';
 import { Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
-import terminalImage from 'terminal-image';
-import supportsTerminalGraphics from 'supports-terminal-graphics';
+import { Jimp } from 'jimp';
 import { profile } from './data.js';
 
-/** True when the terminal can show the real photo (Kitty, Ghostty, WezTerm, iTerm2, VS Code…). */
-export const canDrawPhoto = supportsTerminalGraphics.stdout.kitty || supportsTerminalGraphics.stdout.iterm2;
+type Pixels = string[][];
+type State = { status: 'loading' } | { status: 'ready'; pixels: Pixels } | { status: 'failed' };
 
-let avatarRequest: Promise<Uint8Array | null> | undefined;
-
-export function fetchAvatar() {
-    avatarRequest ??= fetch(profile.avatar, { signal: AbortSignal.timeout(5000) })
-        .then(async res => (res.ok ? new Uint8Array(await res.arrayBuffer()) : null))
-        .catch(() => null);
-    return avatarRequest;
-}
+const hex = (n: number) => Math.round(Math.min(255, Math.max(0, n))).toString(16).padStart(2, '0');
 
 /**
- * Draws the full-resolution photo with the terminal's own graphics protocol.
- * It has to happen outside Ink: Ink measures and re-wraps everything it renders,
- * which would break the image escape sequences.
+ * Turns the photo into a `size`×`size` grid of hex colours. Every grid cell is the
+ * average of its block of source pixels, with a little extra contrast so each
+ * pixel reads as a clear, flat block of colour.
  */
-export async function drawPhoto(columns: number) {
-    const buffer = await fetchAvatar();
-    if (!buffer) return false;
-    try {
-        if (supportsTerminalGraphics.stdout.iterm2) {
-            // iTerm2 inline image protocol (also WezTerm, VS Code, mintty…); accepts the JPEG as is.
-            const data = Buffer.from(buffer).toString('base64');
-            process.stdout.write(`  \u001B]1337;File=inline=1;width=${columns};preserveAspectRatio=1;size=${buffer.length}:${data}\u0007\n`);
-        } else {
-            // Kitty graphics protocol: terminal-image converts to PNG and writes it to stdout itself.
-            process.stdout.write('  ');
-            await terminalImage.buffer(buffer, { width: columns, preserveAspectRatio: true });
-            process.stdout.write('\n');
+async function pixelate(buffer: ArrayBuffer, size: number): Promise<Pixels> {
+    const { bitmap } = await Jimp.fromBuffer(Buffer.from(buffer));
+    const { width, height, data } = bitmap;
+    const side = Math.min(width, height);
+    const ox = Math.floor((width - side) / 2);
+    const oy = Math.floor((height - side) / 2);
+    const contrast = 1.15;
+
+    const rows: Pixels = [];
+    for (let gy = 0; gy < size; gy++) {
+        const row: string[] = [];
+        for (let gx = 0; gx < size; gx++) {
+            const x0 = ox + Math.floor((gx * side) / size);
+            const x1 = ox + Math.floor(((gx + 1) * side) / size);
+            const y0 = oy + Math.floor((gy * side) / size);
+            const y1 = oy + Math.floor(((gy + 1) * side) / size);
+            let r = 0, g = 0, b = 0, n = 0;
+            for (let y = y0; y < y1; y++) {
+                for (let x = x0; x < x1; x++) {
+                    const i = (y * width + x) * 4;
+                    r += data[i]!;
+                    g += data[i + 1]!;
+                    b += data[i + 2]!;
+                    n++;
+                }
+            }
+            const c = (v: number) => (v / n - 128) * contrast + 128;
+            row.push(`#${hex(c(r))}${hex(c(g))}${hex(c(b))}`);
         }
-        return true;
-    } catch {
-        return false;
+        rows.push(row);
     }
+    return rows;
 }
 
-type State = { status: 'loading' } | { status: 'ready'; image: string } | { status: 'failed' };
-
-/** Half-block (▄) rendering of the photo, for terminals without image support. */
-export function Avatar({ width, onSettled }: { width: number; onSettled?: () => void }) {
+/** Pixel-art avatar: every pixel is two terminal cells wide, so it stays square. */
+export function Avatar({ size, onSettled }: { size: number; onSettled?: () => void }) {
     const [state, setState] = useState<State>({ status: 'loading' });
 
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const buffer = await fetchAvatar();
-            const image = buffer
-                ? await terminalImage
-                      .buffer(buffer, { width, preserveAspectRatio: true, preferNativeRender: false })
-                      .catch(() => null)
-                : null;
-            if (!cancelled) setState(image ? { status: 'ready', image } : { status: 'failed' });
+            try {
+                const res = await fetch(profile.avatar, { signal: AbortSignal.timeout(5000) });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const pixels = await pixelate(await res.arrayBuffer(), size);
+                if (!cancelled) setState({ status: 'ready', pixels });
+            } catch {
+                if (!cancelled) setState({ status: 'failed' });
+            }
         })();
         return () => {
             cancelled = true;
         };
-    }, [width]);
+    }, [size]);
 
     useEffect(() => {
         if (state.status !== 'loading') onSettled?.();
@@ -70,14 +75,22 @@ export function Avatar({ width, onSettled }: { width: number; onSettled?: () => 
 
     if (state.status === 'ready') {
         return (
-            <Box flexShrink={0}>
-                <Text>{state.image}</Text>
+            <Box flexDirection="column" flexShrink={0}>
+                {state.pixels.map((row, y) => (
+                    <Text key={y}>
+                        {row.map((color, x) => (
+                            <Text key={x} backgroundColor={color}>
+                                {'  '}
+                            </Text>
+                        ))}
+                    </Text>
+                ))}
             </Box>
         );
     }
 
     return (
-        <Box flexShrink={0} width={width} height={Math.round(width / 2)} alignItems="center" justifyContent="center">
+        <Box flexShrink={0} width={size * 2} height={size} alignItems="center" justifyContent="center">
             {state.status === 'loading' ? (
                 <Text color="magenta">
                     <Spinner type="dots" />
